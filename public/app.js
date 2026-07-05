@@ -19,6 +19,30 @@ async function ensureLib() {
 }
 
 const $ = (id) => document.getElementById(id);
+
+// ---- Global "images processed" counter ----
+const statsBar = document.getElementById('statsBar');
+const statCount = document.getElementById('statCount');
+function renderCount(n) {
+  if (typeof n !== 'number' || n < 0) return;
+  statCount.textContent = n.toLocaleString();
+  statsBar.hidden = false;
+}
+async function loadStats() {
+  try {
+    const r = await fetch('/api/stats');
+    const d = await r.json();
+    renderCount(d.processed);
+  } catch { /* stats are best-effort; ignore */ }
+}
+async function bumpStats() {
+  try {
+    const r = await fetch('/api/processed', { method: 'POST' });
+    const d = await r.json();
+    renderCount(d.processed);
+  } catch { /* ignore */ }
+}
+loadStats();
 const dropzone = $('dropzone');
 const fileInput = $('fileInput');
 const workspace = $('workspace');
@@ -132,6 +156,7 @@ async function handleFile(file) {
     await renderWithBackground(currentBg);
     hideProgress();
     downloadBtn.disabled = false;
+    bumpStats(); // count this successful removal in the global tally
   } catch (err) {
     console.error(err);
     showError('Could not remove the background: ' + (err?.message || err) +

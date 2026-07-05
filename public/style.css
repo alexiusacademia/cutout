@@ -38,6 +38,26 @@ body {
 }
 .tagline { color: var(--muted); font-size: 13px; }
 
+.stats-bar {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 2px auto 0;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.stats-bar strong { color: var(--text); font-weight: 700; }
+.stats-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 0 rgba(52,199,89,.6);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52,199,89,.5); }
+  70% { box-shadow: 0 0 0 7px rgba(52,199,89,0); }
+  100% { box-shadow: 0 0 0 0 rgba(52,199,89,0); }
+}
+
 main {
   flex: 1;
   width: 100%;
