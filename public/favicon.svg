@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6c8cff"/>
+      <stop offset="1" stop-color="#a06bff"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#g)"/>
+  <g fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- crossing blades meeting at the pivot -->
+    <path d="M23 46 L44 15"/>
+    <path d="M41 46 L20 15"/>
+    <!-- handle rings -->
+    <circle cx="21" cy="47" r="5.5"/>
+    <circle cx="43" cy="47" r="5.5"/>
+  </g>
+  <!-- pivot -->
+  <circle cx="32" cy="34" r="2.4" fill="#ffffff"/>
+</svg>
