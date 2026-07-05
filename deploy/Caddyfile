@@ -1,0 +1,8 @@
+# Auto-TLS reverse proxy for Cutout (background remover).
+# Add this block to the host VM's Caddy config (the same container that already
+# proxies jarvis.syncster.dev and chat.syncster.dev), then reload Caddy.
+# Cutout serves static files on port 8092 inside the gateway container.
+cutout.syncster.dev {
+	reverse_proxy GATEWAY_CONTAINER:8092
+	encode gzip
+}

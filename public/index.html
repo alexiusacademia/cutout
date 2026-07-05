@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cutout — Free Background Remover</title>
+<meta name="description" content="Remove image backgrounds instantly, right in your browser. 100% private — your photos never leave your device. Free, no sign-up." />
+<link rel="preconnect" href="https://staticimgly.com" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">✂️</span>
+    <span class="brand-name">Cutout</span>
+  </div>
+  <div class="tagline">Free background remover · 100% private, in your browser</div>
+</header>
+
+<main>
+  <section id="dropzone" class="dropzone">
+    <input type="file" id="fileInput" accept="image/*" hidden />
+    <div class="dz-inner">
+      <div class="dz-icon">🖼️</div>
+      <p class="dz-title">Drop an image here</p>
+      <p class="dz-sub">or <button type="button" id="browseBtn" class="link-btn">browse</button> · paste from clipboard · drag &amp; drop</p>
+      <p class="dz-note">Nothing is uploaded — the AI runs entirely on your device.</p>
+    </div>
+  </section>
+
+  <section id="workspace" class="workspace hidden">
+    <div class="canvas-wrap">
+      <div class="panel">
+        <div class="panel-label">Original</div>
+        <div class="img-holder"><img id="origImg" alt="original" /></div>
+      </div>
+      <div class="panel">
+        <div class="panel-label">Result</div>
+        <div class="img-holder checker" id="resultHolder">
+          <img id="resultImg" alt="result" />
+          <div id="progressOverlay" class="progress-overlay">
+            <div class="spinner"></div>
+            <div id="progressText">Loading AI model…</div>
+            <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="bg-options">
+        <span class="ctrl-label">Background:</span>
+        <button class="bg-swatch active" data-bg="transparent" title="Transparent"><span class="checker-mini"></span></button>
+        <button class="bg-swatch" data-bg="#ffffff" style="background:#fff" title="White"></button>
+        <button class="bg-swatch" data-bg="#000000" style="background:#000" title="Black"></button>
+        <button class="bg-swatch" data-bg="#0a84ff" style="background:#0a84ff" title="Blue"></button>
+        <button class="bg-swatch" data-bg="#34c759" style="background:#34c759" title="Green"></button>
+        <label class="bg-swatch custom" title="Custom color">
+          <input type="color" id="customColor" value="#ff6b6b" />
+        </label>
+      </div>
+      <div class="actions">
+        <button id="downloadBtn" class="btn primary" disabled>⬇ Download PNG</button>
+        <button id="newBtn" class="btn ghost">↺ New image</button>
+      </div>
+    </div>
+  </section>
+
+  <p id="errorBox" class="error-box hidden"></p>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-net">
+    <strong>🔗 More from Syncster</strong>
+    <a href="https://syncster.dev">Syncster</a>
+    <a href="https://pdfly.work">pdfly</a>
+    <a href="https://vidu.syncster.dev">Vidu</a>
+    <a href="https://kanta.syncster.dev">Kanta</a>
+  </div>
+  <div class="footer-note">Cutout runs the AI model locally in your browser. Your images are never uploaded to any server.</div>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
