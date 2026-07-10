@@ -18,6 +18,24 @@ async function ensureLib() {
   return removeBackground;
 }
 
+// Lazy-load the in-browser upscaler (UpscalerJS + ESRGAN model via TensorFlow.js).
+// Cached per scale factor. Runs entirely on-device — nothing is uploaded.
+const upscalers = {};
+async function ensureUpscaler(scale) {
+  if (upscalers[scale]) return upscalers[scale];
+  setProgress('Loading upscaler… (first time downloads the model)', 5);
+  const [uMod, mMod] = await Promise.all([
+    import('https://esm.sh/upscaler@1.0.0'),
+    import(`https://esm.sh/@upscalerjs/esrgan-slim@1.0.0/${scale}x`),
+  ]);
+  const Upscaler = uMod.default || uMod;
+  const model = mMod.default || mMod;
+  if (typeof Upscaler !== 'function') throw new Error('Upscaler library failed to load.');
+  const up = new Upscaler({ model });
+  upscalers[scale] = up;
+  return up;
+}
+
 const $ = (id) => document.getElementById(id);
 
 // ---- Global "images processed" counter ----
@@ -61,6 +79,9 @@ let cutoutBlobUrl = null;   // transparent PNG object URL (the raw matte result)
 let cutoutBitmap = null;    // ImageBitmap of the transparent result, for compositing
 let currentBg = 'transparent';
 let currentName = 'cutout';
+let mode = 'bg';            // 'bg' | 'upscale'
+let lastFile = null;        // most recently selected file (upscale runs on click)
+let upscaledURL = null;     // data URL of the upscaled result
 
 function setProgress(text, pct) {
   progressOverlay.classList.remove('hidden');
@@ -105,11 +126,79 @@ function resetAll() {
   clearError();
   if (cutoutBlobUrl) URL.revokeObjectURL(cutoutBlobUrl);
   cutoutBlobUrl = null; cutoutBitmap = null;
+  upscaledURL = null;
   resultImg.removeAttribute('src');
+  resultImg._exportURL = null;
   origImg.removeAttribute('src');
   downloadBtn.disabled = true;
+  if (upscaleBtn) upscaleBtn.disabled = false;
   fileInput.value = '';
 }
+
+// ---- Mode switcher (background removal ⇄ upscale) ----
+const modeBtns = document.querySelectorAll('.mode-btn');
+const bgOptions = $('bgOptions');
+const upscaleOptions = $('upscaleOptions');
+const resultHolder = $('resultHolder');
+const dzTitle = $('dzTitle');
+const scaleSelect = $('scaleSelect');
+const upscaleBtn = $('upscaleBtn');
+
+function applyMode(m) {
+  mode = m;
+  modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+  bgOptions.classList.toggle('hidden', m !== 'bg');
+  upscaleOptions.classList.toggle('hidden', m !== 'upscale');
+  resultHolder.classList.toggle('checker', m === 'bg'); // opaque bg for upscale
+  dzTitle.textContent = m === 'bg' ? 'Drop an image here' : 'Drop an image to upscale';
+  resetAll();
+}
+modeBtns.forEach(b => b.addEventListener('click', () => applyMode(b.dataset.mode)));
+
+// ---- Upscale flow ----
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+upscaleBtn.addEventListener('click', async () => {
+  if (!lastFile) return;
+  clearError();
+  const scale = scaleSelect.value;
+  downloadBtn.disabled = true;
+  upscaleBtn.disabled = true;
+  setProgress('Loading upscaler… (first time downloads the model)', 5);
+  try {
+    const up = await ensureUpscaler(scale);
+    const img = await loadImage(lastFile);
+    if (Math.max(img.width, img.height) * Number(scale) > 8000) {
+      throw new Error('that image is too large for ' + scale + '× — try 2× or a smaller image');
+    }
+    setProgress('Upscaling… this can take a bit', 12);
+    let out = await up.upscale(img, {
+      output: 'base64',
+      patchSize: 128,
+      padding: 6,
+      progress: (rate) => setProgress('Upscaling… this can take a bit', 12 + (rate || 0) * 86),
+    });
+    if (!String(out).startsWith('data:')) out = 'data:image/png;base64,' + out;
+    upscaledURL = out;
+    resultImg.src = out;
+    resultImg._exportURL = out;
+    hideProgress();
+    downloadBtn.disabled = false;
+    bumpStats();
+  } catch (err) {
+    console.error(err);
+    showError('Upscaling failed: ' + (err?.message || err) + '. Try a smaller image or a browser with WebGL support.');
+  } finally {
+    upscaleBtn.disabled = false;
+  }
+});
 
 // ---- Main flow ----
 async function handleFile(file) {
@@ -127,8 +216,17 @@ async function handleFile(file) {
   workspace.classList.remove('hidden');
   resultImg.removeAttribute('src');
   downloadBtn.disabled = true;
-  setProgress('Loading AI model…', 8);
+  lastFile = file;
 
+  if (mode === 'bg') {
+    await runBgRemoval(file);
+  } else {
+    hideProgress(); // upscale runs when the user clicks "Upscale"
+  }
+}
+
+async function runBgRemoval(file) {
+  setProgress('Loading AI model…', 8);
   try {
     const remove = await ensureLib();
     setProgress('Removing background…', 15);
@@ -199,6 +297,16 @@ customColor.addEventListener('input', () => {
 
 // ---- Download ----
 downloadBtn.addEventListener('click', () => {
+  if (mode === 'upscale') {
+    if (!upscaledURL) return;
+    const a = document.createElement('a');
+    a.href = upscaledURL;
+    a.download = `${currentName}-upscaled-${scaleSelect.value}x.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    return;
+  }
   const canvas = resultImg._exportCanvas;
   if (!canvas) return;
   canvas.toBlob((blob) => {

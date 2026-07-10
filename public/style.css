@@ -238,3 +238,20 @@ main {
   background: var(--panel); border: 1px solid var(--border);
   border-radius: 10px; padding: 14px 16px; margin: 16px 0;
 }
+
+/* Mode switcher (background removal ⇄ upscale) */
+.mode-bar { display: flex; justify-content: center; gap: 8px; margin: 16px auto 0; max-width: 1000px; padding: 0 20px; }
+.mode-btn {
+  background: var(--panel); color: var(--text); border: 1px solid var(--border);
+  border-radius: 10px; padding: 9px 18px; font-size: 14px; font-weight: 700; cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.mode-btn:hover { border-color: var(--accent); }
+.mode-btn.active { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: #fff; border-color: transparent; }
+
+/* Upscale controls */
+.upscale-options { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.upscale-options select {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 12px; font-size: 14px; cursor: pointer;
+}

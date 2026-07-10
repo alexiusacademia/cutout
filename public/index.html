@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Cutout — Free Background Remover</title>
-<meta name="description" content="Remove image backgrounds instantly, right in your browser. 100% private — your photos never leave your device. Free, no sign-up." />
+<title>Cutout — Free Background Remover &amp; AI Image Upscaler</title>
+<meta name="description" content="Remove image backgrounds and upscale images with AI, right in your browser. 100% private — your photos never leave your device. Free, no sign-up." />
 <meta name="theme-color" content="#6c8cff" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="/favicon.svg" />
 <link rel="preconnect" href="https://staticimgly.com" />
 <!-- Google AdSense -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2445415508470678" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
 <header class="topbar">
@@ -19,8 +19,13 @@
     <span class="logo">✂️</span>
     <span class="brand-name">Cutout</span>
   </div>
-  <div class="tagline">Free background remover · 100% private, in your browser</div>
+  <div class="tagline">Remove backgrounds &amp; upscale images · 100% private, in your browser</div>
 </header>
+
+<nav class="mode-bar">
+  <button class="mode-btn active" data-mode="bg">✂️ Remove background</button>
+  <button class="mode-btn" data-mode="upscale">🔍 Upscale</button>
+</nav>
 
 <div class="stats-bar" id="statsBar" hidden>
   <span class="stats-dot"></span>
@@ -32,7 +37,7 @@
     <input type="file" id="fileInput" accept="image/*" hidden />
     <div class="dz-inner">
       <div class="dz-icon">🖼️</div>
-      <p class="dz-title">Drop an image here</p>
+      <p class="dz-title" id="dzTitle">Drop an image here</p>
       <p class="dz-sub">or <button type="button" id="browseBtn" class="link-btn">browse</button> · paste from clipboard · drag &amp; drop</p>
       <p class="dz-note">Nothing is uploaded — the AI runs entirely on your device.</p>
     </div>
@@ -58,7 +63,7 @@
     </div>
 
     <div class="controls">
-      <div class="bg-options">
+      <div class="bg-options" id="bgOptions">
         <span class="ctrl-label">Background:</span>
         <button class="bg-swatch active" data-bg="transparent" title="Transparent"><span class="checker-mini"></span></button>
         <button class="bg-swatch" data-bg="#ffffff" style="background:#fff" title="White"></button>
@@ -68,6 +73,14 @@
         <label class="bg-swatch custom" title="Custom color">
           <input type="color" id="customColor" value="#ff6b6b" />
         </label>
+      </div>
+      <div class="upscale-options hidden" id="upscaleOptions">
+        <span class="ctrl-label">Scale:</span>
+        <select id="scaleSelect">
+          <option value="2">2×</option>
+          <option value="4" selected>4×</option>
+        </select>
+        <button id="upscaleBtn" class="btn primary">🔍 Upscale</button>
       </div>
       <div class="actions">
         <button id="downloadBtn" class="btn primary" disabled>⬇ Download PNG</button>
@@ -93,6 +106,6 @@
   </div>
 </footer>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=2"></script>
 </body>
 </html>
